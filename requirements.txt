@@ -1,0 +1,4 @@
+flask
+loguru
+Flask-WTF
+Flask-Bootstrap4
