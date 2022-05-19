@@ -7,12 +7,9 @@
 		body { background: #e8f1f9; }
 	</style>
 {% endblock %}
-
-
 {% block title %}
 Регистрация
 {% endblock %}
-
 
 {% block content %}
 
@@ -21,12 +18,143 @@
     <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
 
       <h1 class="pt-5 pb-2">Зарегистрироваться</h1>
-
-      {{ wtf.quick_form(form) }}
+      <form method="POST" action="">
+        {{ form.csrf_token }}
+        <h3>Login</h3>
+        {{ form.name() }} 
+        <br>
+        <h3>Password</h3>
+        {{ form.password()}}
+        <br>
+        <input type="hidden" id="public_key" value="{{ key }}">
+        <input type="hidden" id="url" value="{{ url_for('views.jscipher') }}">
+        <br>
+        {{ form.submit(onclick="encrypt()") }}
+      </form>
 
       <p class="pt-5"><strong>{{ error }}</strong></p>
       <a href="{{ url_for('views.registration') }}">Зарегистрироваться</a>
+      <script>
+        async function encrypt()
+        {
+          var name=document.getElementById('name').value;
+          var pass=document.getElementById('password').value;
+          var public_key=document.getElementById('public_key').value;
+          let ciphertext = await importPublicKeyAndEncrypt('hello', public_key);
+          console.log("Ciphertext:", ciphertext);
+          //
+          url = document.getElementById('url').value;
+          console.log(JSON.stringify({"Ciphertext": ciphertext}))
+          let response = fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(ciphertext),
+          });
+        }
 
+        async function importPublicKeyAndEncrypt(str, publicKey) {
+          const pub = await importPublicKey(publicKey);
+          console.log(pub);
+          const encrypted = await encryptRSA(pub, new TextEncoder().encode(str));
+          const encryptedBase64 = window.btoa(ab2str(encrypted));
+          //console.log(encryptedBase64.replace(/(.{64})/g, '$1\n'));
+          return encryptedBase64;
+        }
+
+        async function importPrivateKeyAndDecrypt(str, privateKey) {
+          try {
+            const priv = await importPrivateKey(privateKey);
+            const decrypted = await decryptRSA(priv, str2ab(window.atob(str)));
+            //console.log(decrypted);
+            return decrypted;
+          } catch (error) {
+            console.log(error);
+          }
+        }
+
+        async function importPublicKey(spkiPem) {
+          return await window.crypto.subtle.importKey(
+            'spki',
+            getSpkiDer(spkiPem),
+            {
+              name: 'RSA-OAEP',
+              hash: 'SHA-256',
+            },
+            true,
+            ['encrypt']
+          );
+        }
+
+        async function importPrivateKey(pkcs8Pem) {
+          return await window.crypto.subtle.importKey(
+            'pkcs8',
+            getPkcs8DerDecode(pkcs8Pem),
+            {
+              name: 'RSA-OAEP',
+              hash: 'SHA-256',
+            },
+            true,
+            ['decrypt']
+          );
+        }
+
+        async function encryptRSA(key, plaintext) {
+          let encrypted = await window.crypto.subtle.encrypt(
+            {
+              name: 'RSA-OAEP',
+            },
+            key,
+            plaintext
+          );
+          return encrypted;
+        }
+
+        async function decryptRSA(key, ciphertext) {
+          let decrypted = await window.crypto.subtle.decrypt(
+            {
+              name: 'RSA-OAEP',
+            },
+            key,
+            ciphertext
+          );
+          return new TextDecoder().decode(decrypted);
+        }
+
+        function getSpkiDer(spkiPem) {
+          const pemHeader = '-----BEGIN PUBLIC KEY-----';
+          const pemFooter = '-----END PUBLIC KEY-----';
+          var pemContents = spkiPem.substring(
+            pemHeader.length,
+            spkiPem.length - pemFooter.length
+          );
+          var binaryDerString = window.atob(pemContents);
+          return str2ab(binaryDerString);
+        }
+
+        function getPkcs8DerDecode(pkcs8Pem) {
+          const pemHeader = '-----BEGIN PRIVATE KEY-----';
+          const pemFooter = '-----END PRIVATE KEY-----';
+          var pemContents = pkcs8Pem.substring(
+            pemHeader.length,
+            pkcs8Pem.length - pemFooter.length
+          );
+          var binaryDerString = window.atob(pemContents);
+          return str2ab(binaryDerString);
+        }
+
+        function str2ab(str) {
+          const buf = new ArrayBuffer(str.length);
+          const bufView = new Uint8Array(buf);
+          for (let i = 0, strLen = str.length; i < strLen; i++) {
+            bufView[i] = str.charCodeAt(i);
+          }
+          return buf;
+        }
+
+        function ab2str(buf) {
+          return String.fromCharCode.apply(null, new Uint8Array(buf));
+        }
+        
+      </script>
     </div>
   </div>
 </div>
