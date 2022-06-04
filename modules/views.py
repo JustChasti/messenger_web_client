@@ -5,7 +5,8 @@ from flask import render_template, redirect, url_for
 from modules import forms
 from time import sleep
 from Cryptodome.PublicKey import RSA
-from Cryptodome.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA256
+from Cryptodome.Cipher import PKCS1_v1_5, PKCS1_OAEP
 from Cryptodome.Random import get_random_bytes
 import base64
 
@@ -50,17 +51,17 @@ def login():
     ermessage = ''
     global keyPair
     public_key = keyPair.publickey()
-    pubKey= public_key.exportKey().decode('ascii')
+    pubKey = public_key.exportKey().decode('ascii')
     privKey = keyPair.exportKey().decode('ascii')
 
-    print(pubKey, privKey)
+    # print(pubKey, privKey)
 
     if form.validate_on_submit():
         # session['name'] = form.name.data
         # session['password'] = form.password.data
         # try:
-        sleep(10)
-        print(form.password.data)
+        # sleep(1)
+        # print(form.password.data)
         """
         ciphertext = base64.b64decode(form.password.data)
         cipher = PKCS1_OAEP.new(keyPair)
@@ -82,12 +83,9 @@ def jscipher():
     print(data)
     global keyPair
     ciphertext = base64.b64decode(data)
-    cipher = PKCS1_OAEP.new(keyPair)
-    print(ciphertext)
-    # data_bytes = base64.b64decode(str(ciphertext).encode('utf-8'))
-    # print(form.password.data)
-    plain_text = cipher.decrypt(ciphertext)
-    print(base64.b64encode(plain_text))
+    cipher = PKCS1_v1_5.new(keyPair)
+    plain_text = cipher.decrypt(ciphertext, 'bollox')
+    print(plain_text, 'text')
     return (
         json.dumps({'info': 'ok'}),
         200,

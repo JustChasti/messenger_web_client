@@ -2,3 +2,6 @@ flask
 loguru
 Flask-WTF
 Flask-Bootstrap4
+pycodestyle
+pycryptodome
+pycryptodomex
