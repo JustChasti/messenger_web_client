@@ -21,11 +21,40 @@
     <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
 
       <h1 class="pt-5 pb-2">Зарегистрироваться</h1>
-
-      {{ wtf.quick_form(form) }}
+      <form method="POST" action="">
+        {{ form.csrf_token }}
+        <h3>Login</h3>
+        <input id="name">
+        <br>
+        <h3>Password</h3>
+        <input id="password">
+        <br>
+        <input type="hidden" id="public_key" value="{{ key }}">
+        <input type="hidden" id="url" value="{{ url_for('views.jsregistr') }}">
+        <br>
+        {{ form.submit(onclick="encrypt()") }}
+      </form>
 
       <p class="pt-5"><strong>{{ error }}</strong></p>
-
+      <script src="https://cdn.jsdelivr.net/npm/node-forge@1.0.0/dist/forge.min.js"></script>
+      <script>
+        async function encrypt()
+        {
+          var name=document.getElementById('name').value;
+          var pass=document.getElementById('password').value;
+          var public_key=document.getElementById('public_key').value;
+          var publicKey = forge.pki.publicKeyFromPem(public_key);
+          var ciphertext = publicKey.encrypt(pass, "RSAES-PKCS1-V1_5");
+          var base64 = forge.util.encode64(ciphertext);
+          //
+          url = document.getElementById('url').value;
+          let response = fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({"username": name,"ciphertext": base64, "public_key": public_key}),
+          });
+        }
+        
+      </script>
     </div>
   </div>
 </div>

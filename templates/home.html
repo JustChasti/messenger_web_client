@@ -1,5 +1,51 @@
-<html>
-    <body>
-        <h1>{{title}}</h1>
-    </body>
-</html>
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+	</style>
+{% endblock %}
+{% block title %}
+Главная
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+      <h1 class="pt-5 pb-2">Полученные сообщения</h1>
+      <table style="width:100%">
+        <tr>
+          <th>Время</th>
+          <th>от</th>
+          <th>текст</th>
+        </tr>
+        {%for i in messages%}
+        <tr>
+            <td>{{i['time']}}</td>
+            <td>{{i['from']}}</td>
+            <td>{{i['text']}}</td>
+        </tr>
+        {%endfor%}
+      </table>
+      <br>
+      <br>
+      <h1 class="pt-5 pb-2">Отправить сообщение</h1>
+      <form method="POST" action="" style="width:100%">
+        {{ form.csrf_token }}
+        <h3>Получатель</h3>
+        {{ form.recipient() }} 
+        <br>
+        <h3>Текст</h3>
+        {{ form.text(rows='2',cols='100')}}
+        {{ form.submit() }}
+      </form>
+      <p>{{message}}</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

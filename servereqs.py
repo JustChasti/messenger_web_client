@@ -1,4 +1,3 @@
-from lib2to3.pgen2 import token
 from logging import exception
 from urllib import response
 from Cryptodome.PublicKey import RSA
@@ -183,19 +182,20 @@ def get_messages(username, token, keypair, server_key):
     """
 
 
-keyPair = RSA.generate(1024)
-keyPair1 = RSA.generate(1024)
-server_key = load_pem_public_key(
-        open('server_public.pem').read().encode(),
-        backend=default_backend()
-)
+if __name__ == "__main__":
+    keyPair = RSA.generate(1024)
+    keyPair1 = RSA.generate(1024)
+    server_key = load_pem_public_key(
+            open('server_public.pem').read().encode(),
+            backend=default_backend()
+    )
+    token1 = authorization('user2', 'qwerty', keyPair, server_key)
+    print(token1)
 
-token1 = authorization('test', 'qwerty', keyPair, server_key)
+    # token = 'c244d66c-1d66-4060-90be-7e49ee9d6e67'
+    send_message('user2', 'testuser5', 'test message 2', token1, keyPair, server_key)
 
-token = 'c244d66c-1d66-4060-90be-7e49ee9d6e67'
-send_message('test1', 'test', 'test message 2', token, keyPair, server_key)
+    # get_messages('test', token1, keyPair, server_key)
 
-get_messages('test', token1, keyPair, server_key)
-
-# token = registration('test1', 'qwerty', keyPair, server_key)
-# print(token)
+    # token = registration('test1', 'qwerty', keyPair, server_key)
+    # print(token)
