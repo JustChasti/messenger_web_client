@@ -1,4 +1,3 @@
-from lib2to3.pgen2 import token
 from logging import exception
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_v1_5

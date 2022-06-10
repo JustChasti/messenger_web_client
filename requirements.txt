@@ -5,3 +5,5 @@ Flask-Bootstrap4
 pycodestyle
 pycryptodome
 pycryptodomex
+cryptography
+requests
